@@ -11,8 +11,8 @@ func Execute() {
 	// 	LanguageID: 2,
 	// 	Type:       int(vocabulary.Base),
 	// })
-	words := vocabulary.GetWords(vocabulary.Language{
-		ID: 2,
+	words, _ := vocabulary.GetWords(vocabulary.Language{
+		ID: 1,
 	})
-	fmt.Printf("%v", words)
+	fmt.Printf("%s", words)
 }

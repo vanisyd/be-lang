@@ -30,7 +30,8 @@ type Translation struct {
 }
 
 var WordModel data.Model = data.Model{
-	Name: "words",
+	Name:    "Word",
+	SQLName: "words",
 	Columns: []data.ModelField{
 		{
 			Name:    "ID",
@@ -48,15 +49,12 @@ var WordModel data.Model = data.Model{
 			Name:    "Type",
 			SQLName: "type",
 		},
-		{
-			Name:    "CreatedAt",
-			SQLName: "created_at",
-		},
 	},
 }
 
 var LanguageModel data.Model = data.Model{
-	Name: "languages",
+	Name:    "Language",
+	SQLName: "languages",
 	Columns: []data.ModelField{
 		{
 			Name:    "ID",
@@ -66,15 +64,12 @@ var LanguageModel data.Model = data.Model{
 			Name:    "ISO",
 			SQLName: "iso",
 		},
-		{
-			Name:    "CreatedAt",
-			SQLName: "created_at",
-		},
 	},
 }
 
 var TranslationModel data.Model = data.Model{
-	Name: "translations",
+	Name:    "Translation",
+	SQLName: "translations",
 	Columns: []data.ModelField{
 		{
 			Name:    "ID",
@@ -99,7 +94,7 @@ func (*Word) MakeInstance() Word {
 	return Word{}
 }
 
-func GetWords(lang Language) []map[string]string {
+func GetWords(lang Language) ([]byte, error) {
 	dbConnection := data.DBConnection()
 	defer dbConnection.Close()
 
@@ -114,7 +109,7 @@ func GetWords(lang Language) []map[string]string {
 
 	data.Get(dbConnection, &query)
 
-	return query.Data
+	return query.ToJson()
 }
 
 func AddWord(wordObj Word) Word {

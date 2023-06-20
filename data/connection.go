@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -17,6 +18,7 @@ type ModelField struct {
 
 type Model struct {
 	Name    string
+	SQLName string
 	Columns []ModelField
 }
 
@@ -44,7 +46,7 @@ type Query struct {
 	SelectStmts    []SelectStmt
 	ConditionStmts []ConditionStmt
 	JoinStmts      []JoinStmt
-	Data           []map[string]string
+	Data           []map[string]any
 }
 
 func (query *Query) AddStmt(stmt interface{}) *Query {
@@ -90,12 +92,20 @@ func (query *Query) Join(model Model, field string, foreignField string) *Query 
 	return query
 }
 
+func (query *Query) ToJson() ([]byte, error) {
+	return json.Marshal(query.Data)
+}
+
 func (query *Query) clearData() {
-	query.Data = make([]map[string]string, 0)
+	query.Data = make([]map[string]any, 0)
 }
 
 func (model *Model) TableName() string {
-	return model.Name
+	return model.SQLName
+}
+
+func (model *Model) GetName() string {
+	return fmt.Sprintf("%ss", model.Name)
 }
 
 func DBConnection() *sql.DB {
@@ -135,14 +145,34 @@ func Get(dbConnection *sql.DB, queryObj *Query) {
 
 	for rows.Next() {
 		rows.Scan(dataPtr...)
-		serializedData := make(map[string]string, len(columns))
 
-		for i, columnName := range columns {
-			value := string(data[i])
-			serializedData[columnName] = value
+		serializedData := make(map[string]interface{}, len(columns))
+		colIndex := 0
+		for _, stmt := range queryObj.SelectStmts {
+			serializedStmt := make(map[string]interface{}, len(stmt.Model.Columns))
+			for _, column := range stmt.Model.Columns {
+				value := string(data[colIndex])
+				serializedStmt[column.Name] = value
+				colIndex++
+			}
+
+			if stmt.Model.GetName() == queryObj.Model.GetName() {
+				for key, val := range serializedStmt {
+					serializedData[key] = val
+				}
+			} else {
+				serializedData[stmt.Model.GetName()] = map[string]interface{}{}
+				for key, val := range serializedStmt {
+					nestedData, ok := serializedData[stmt.Model.GetName()].(map[string]any)
+					if ok == true {
+						nestedData[key] = val
+					}
+				}
+			}
 		}
 		queryObj.Data = append(queryObj.Data, serializedData)
 	}
+
 	return
 }
 
