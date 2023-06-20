@@ -16,9 +16,8 @@ type ModelField struct {
 }
 
 type Model struct {
-	Name      string
-	Columns   []ModelField
-	Structure interface{}
+	Name    string
+	Columns []ModelField
 }
 
 type JoinStmt struct {
@@ -45,6 +44,7 @@ type Query struct {
 	SelectStmts    []SelectStmt
 	ConditionStmts []ConditionStmt
 	JoinStmts      []JoinStmt
+	Data           []map[string]string
 }
 
 func (query *Query) AddStmt(stmt interface{}) *Query {
@@ -90,6 +90,10 @@ func (query *Query) Join(model Model, field string, foreignField string) *Query 
 	return query
 }
 
+func (query *Query) clearData() {
+	query.Data = make([]map[string]string, 0)
+}
+
 func (model *Model) TableName() string {
 	return model.Name
 }
@@ -114,13 +118,31 @@ func DBConnection() *sql.DB {
 	return DB
 }
 
-func Get(dbConnection *sql.DB, queryObj *Query) (rows *sql.Rows) {
+func Get(dbConnection *sql.DB, queryObj *Query) {
 	query := prepareQuery(queryObj)
 	rows, err := dbConnection.Query(query)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	columns, _ := rows.Columns()
+	data := make([][]byte, len(columns))
+	dataPtr := make([]any, len(columns))
+
+	for i := range data {
+		dataPtr[i] = &data[i]
+	}
+
+	for rows.Next() {
+		rows.Scan(dataPtr...)
+		serializedData := make(map[string]string, len(columns))
+
+		for i, columnName := range columns {
+			value := string(data[i])
+			serializedData[columnName] = value
+		}
+		queryObj.Data = append(queryObj.Data, serializedData)
+	}
 	return
 }
 

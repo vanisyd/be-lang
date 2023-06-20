@@ -53,7 +53,6 @@ var WordModel data.Model = data.Model{
 			SQLName: "created_at",
 		},
 	},
-	Structure: Word{},
 }
 
 var LanguageModel data.Model = data.Model{
@@ -100,8 +99,7 @@ func (*Word) MakeInstance() Word {
 	return Word{}
 }
 
-func GetWords(lang Language) []Word {
-	var words []Word
+func GetWords(lang Language) []map[string]string {
 	dbConnection := data.DBConnection()
 	defer dbConnection.Close()
 
@@ -114,18 +112,9 @@ func GetWords(lang Language) []Word {
 	query.Where("words.language_id", "=", fmt.Sprint(lang.ID))
 	query.Join(LanguageModel, "language_id", "id")
 
-	rows := data.Get(dbConnection, &query)
+	data.Get(dbConnection, &query)
 
-	for rows.Next() {
-		var dbWord Word
-		var dbLang Language
-		fmt.Println(rows.Columns())
-		rows.Scan(&dbWord.ID, &dbWord.Text, &dbWord.LanguageID, &dbWord.Type, &dbLang.ID, &dbLang.ISO)
-		dbWord.Language = dbLang
-		words = append(words, dbWord)
-	}
-
-	return words
+	return query.Data
 }
 
 func AddWord(wordObj Word) Word {

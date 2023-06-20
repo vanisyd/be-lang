@@ -14,6 +14,5 @@ func Execute() {
 	words := vocabulary.GetWords(vocabulary.Language{
 		ID: 2,
 	})
-
 	fmt.Printf("%v", words)
 }
