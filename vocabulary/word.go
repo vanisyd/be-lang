@@ -22,11 +22,9 @@ type Language struct {
 }
 
 type Translation struct {
-	ID              int `json:"id"`
-	WordID          int `json:"word_id"`
-	TranslationID   int `json:"translation_id"`
-	Word            Word
-	WordTranslation Word
+	ID            int `json:"id"`
+	WordID        int `json:"word_id"`
+	TranslationID int `json:"translation_id"`
 }
 
 var WordModel data.Model = data.Model{
@@ -49,6 +47,10 @@ var WordModel data.Model = data.Model{
 			Name:    "Type",
 			SQLName: "type",
 		},
+		{
+			Name:    "CreatedAt",
+			SQLName: "created_at",
+		},
 	},
 }
 
@@ -63,6 +65,10 @@ var LanguageModel data.Model = data.Model{
 		{
 			Name:    "ISO",
 			SQLName: "iso",
+		},
+		{
+			Name:    "CreatedAt",
+			SQLName: "created_at",
 		},
 	},
 }
@@ -102,11 +108,9 @@ func GetWords(lang Language) ([]byte, error) {
 		Model: WordModel,
 	}
 
-	query.Select(WordModel, []string{"id", "text", "language_id", "type"})
-	query.Select(LanguageModel, []string{"id", "iso"})
+	query.Select(WordModel).Select(LanguageModel)
+	query.Join(WordModel, LanguageModel, "language_id", "id")
 	query.Where("words.language_id", "=", fmt.Sprint(lang.ID))
-	query.Join(LanguageModel, "language_id", "id")
-
 	data.Get(dbConnection, &query)
 
 	return query.ToJson()
