@@ -18,13 +18,20 @@ type JoinStmt struct {
 	Field        string
 	ForeignField string
 }
+
 type SelectStmt struct {
 	Model Model
 }
+
 type ConditionStmt struct {
 	Field    string
 	Operator string
 	Value    string
+}
+
+type InsertStmt struct {
+	Model  Model
+	Values map[string]interface{}
 }
 
 type Query struct {
@@ -33,5 +40,7 @@ type Query struct {
 	SelectStmts    []SelectStmt
 	ConditionStmts []ConditionStmt
 	JoinStmts      []JoinStmt
+	InsertStmt     InsertStmt
 	Data           []map[string]any
+	Type           int
 }

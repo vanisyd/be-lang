@@ -120,12 +120,18 @@ func AddWord(wordObj Word) Word {
 	dbConnection := data.DBConnection()
 	defer dbConnection.Close()
 
-	dbWord, err := dbConnection.Exec("INSERT INTO `words` (`text`, `language_id`, `type`) VALUES (?, ?, ?)", wordObj.Text, wordObj.LanguageID, wordObj.Type)
-	if err != nil {
-		log.Fatal(err)
-		return wordObj
+	query := data.Query{
+		Model: WordModel,
 	}
-	wordID, err := dbWord.LastInsertId()
+
+	query.Insert(map[string]interface{}{
+		"text":        wordObj.Text,
+		"language_id": wordObj.LanguageID,
+		"type":        wordObj.Type,
+	})
+	result := data.Execute(dbConnection, &query)
+
+	wordID, err := result.LastInsertId()
 	if err != nil {
 		log.Fatal(err)
 		return wordObj

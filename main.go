@@ -1,18 +1,17 @@
 package web
 
 import (
-	"fmt"
-	"studying/web/vocabulary"
+	"studying/web/bootstrap"
 )
 
 func Execute() {
 	// words := vocabulary.AddWord(vocabulary.Word{
-	// 	Text:       "новий",
-	// 	LanguageID: 2,
+	// 	Text:       "leaf",
+	// 	LanguageID: 1,
 	// 	Type:       int(vocabulary.Base),
 	// })
-	words, _ := vocabulary.GetWords(vocabulary.Language{
-		ID: 1,
-	})
-	fmt.Printf("%s", words)
+	// words, _ := vocabulary.GetWords(vocabulary.Language{
+	// 	ID: 1,
+	// })
+	bootstrap.Execute()
 }
