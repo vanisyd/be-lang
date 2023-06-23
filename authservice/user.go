@@ -27,7 +27,6 @@ type AuthUser struct {
 
 func Auth(userObj User) (AuthUser, error) {
 	dbConnection := data.DBConnection()
-	defer dbConnection.Close()
 
 	user, err := findUser(dbConnection, userObj.ID)
 	if err != nil {
@@ -48,7 +47,6 @@ func Auth(userObj User) (AuthUser, error) {
 func Register(userObj User) (AuthUser, error) {
 	var user AuthUser
 	dbConnection := data.DBConnection()
-	defer dbConnection.Close()
 
 	rows, err := dbConnection.Query("SELECT * FROM `users` WHERE `name` = ?", userObj.Name)
 	defer rows.Close()

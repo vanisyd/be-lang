@@ -24,5 +24,6 @@ func GetResponse(w http.ResponseWriter, r *http.Request, handler Action) {
 	HTTPRequest = r
 	HTTPQuery = HTTPRequest.URL.Query()
 	resp := handler()
-	fmt.Fprintf(w, "[%d] %s", resp.StatusCode, resp.Content)
+	w.WriteHeader(resp.StatusCode)
+	fmt.Fprintf(w, "%s", resp.Content)
 }

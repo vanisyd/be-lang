@@ -100,9 +100,8 @@ func (*Word) MakeInstance() Word {
 	return Word{}
 }
 
-func GetWords(lang Language) ([]byte, error) {
+func GetWords(langId int) ([]byte, error) {
 	dbConnection := data.DBConnection()
-	defer dbConnection.Close()
 
 	query := data.Query{
 		Model: WordModel,
@@ -110,7 +109,7 @@ func GetWords(lang Language) ([]byte, error) {
 
 	query.Select(WordModel).Select(LanguageModel)
 	query.Join(WordModel, LanguageModel, "language_id", "id")
-	query.Where("words.language_id", "=", fmt.Sprint(lang.ID))
+	query.Where("words.language_id", "=", fmt.Sprint(langId))
 	data.Get(dbConnection, &query)
 
 	return query.ToJson()
@@ -118,7 +117,6 @@ func GetWords(lang Language) ([]byte, error) {
 
 func AddWord(wordObj Word) Word {
 	dbConnection := data.DBConnection()
-	defer dbConnection.Close()
 
 	query := data.Query{
 		Model: WordModel,

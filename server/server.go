@@ -12,6 +12,7 @@ var httpServer = &http.Server{
 	MaxHeaderBytes: 1 << 20,
 }
 
-func Run() {
+func Run(handler http.Handler) {
+	httpServer.Handler = handler
 	httpServer.ListenAndServe()
 }
