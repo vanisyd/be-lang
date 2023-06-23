@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strconv"
 	"studying/web/controller/request/word"
 	"studying/web/server"
 	"studying/web/vocabulary"
@@ -17,8 +16,7 @@ func GetWords() server.Response {
 		}
 	}
 
-	langId, _ := strconv.Atoi(request["lang_id"])
-	content, _ := vocabulary.GetWords(langId)
+	content, _ := vocabulary.GetWords(request["lang_id"].(int))
 
 	return server.Response{
 		StatusCode: http.StatusOK,

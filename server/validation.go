@@ -1,5 +1,7 @@
 package server
 
+import "strconv"
+
 type RequestField struct {
 	Name  string
 	Rules []string
@@ -7,6 +9,12 @@ type RequestField struct {
 
 func (field *RequestField) Required() *RequestField {
 	field.Rules = append(field.Rules, RULE_REQUIRED)
+
+	return field
+}
+
+func (field *RequestField) Int() *RequestField {
+	field.Rules = append(field.Rules, RULE_INT)
 
 	return field
 }
@@ -23,11 +31,12 @@ func Rule(fieldName string) (reqField *RequestField) {
 	return
 }
 
-func Validate(rules []RequestField) (reqValues map[string]string, valid bool) {
-	reqValues = map[string]string{}
+func Validate(rules []RequestField) (reqValues map[string]any, valid bool) {
+	reqValues = map[string]any{}
 	valid = true
 
 	for _, field := range rules {
+		var convertedValue any
 		val := GetParam(field.Name)
 		fieldValid := true
 
@@ -37,11 +46,21 @@ func Validate(rules []RequestField) (reqValues map[string]string, valid bool) {
 				if val == "" {
 					fieldValid = false
 				}
+			case RULE_INT:
+				value, err := strconv.Atoi(val)
+				if err != nil {
+					fieldValid = false
+				}
+				convertedValue = value
 			}
 		}
 
 		if fieldValid {
-			reqValues[field.Name] = val
+			if convertedValue != nil {
+				reqValues[field.Name] = convertedValue
+			} else {
+				reqValues[field.Name] = val
+			}
 		} else {
 			valid = false
 		}

@@ -6,3 +6,4 @@ const METHOD_PATCH = "PATCH"
 const METHOD_PUT = "PUT"
 
 const RULE_REQUIRED = "required"
+const RULE_INT = "int"
