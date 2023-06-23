@@ -3,18 +3,21 @@ package api
 import (
 	"net/http"
 	"strconv"
+	"studying/web/controller/request/word"
 	"studying/web/server"
 	"studying/web/vocabulary"
 )
 
 func GetWords() server.Response {
-	langId, err := strconv.Atoi(server.HTTPQuery.Get("lang_id"))
-	if err != nil {
+	request, valid := word.GetWordRequest()
+
+	if !valid {
 		return server.Response{
 			StatusCode: http.StatusUnprocessableEntity,
 		}
 	}
 
+	langId, _ := strconv.Atoi(request["lang_id"])
 	content, _ := vocabulary.GetWords(langId)
 
 	return server.Response{
