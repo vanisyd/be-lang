@@ -16,4 +16,9 @@ var Routes map[string]server.Route = map[string]server.Route{
 		Handler: api.AddWord,
 		Method:  server.METHOD_POST,
 	},
+	"/languages/create/": {
+		Path:    "/languages/create",
+		Handler: api.AddLang,
+		Method:  server.METHOD_POST,
+	},
 }

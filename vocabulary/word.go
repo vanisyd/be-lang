@@ -139,3 +139,25 @@ func AddWord(wordObj Word) Word {
 
 	return wordObj
 }
+
+func AddLang(langObj Language) Language {
+	dbConnection := data.DBConnection()
+
+	query := data.Query{
+		Model: LanguageModel,
+	}
+
+	query.Insert(map[string]interface{}{
+		"iso": langObj.ISO,
+	})
+	result := data.Execute(dbConnection, &query)
+
+	langID, err := result.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	langObj.ID = int(langID)
+
+	return langObj
+}
