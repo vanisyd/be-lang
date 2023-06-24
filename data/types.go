@@ -34,6 +34,12 @@ type InsertStmt struct {
 	Values map[string]interface{}
 }
 
+type OrderStmt struct {
+	Field     string
+	Direction string
+	Model     Model
+}
+
 type Query struct {
 	Model          Model
 	Statements     []interface{}
@@ -41,6 +47,9 @@ type Query struct {
 	ConditionStmts []ConditionStmt
 	JoinStmts      []JoinStmt
 	InsertStmt     InsertStmt
+	OrderStmts     []OrderStmt
 	Data           []map[string]any
 	Type           int
 }
+
+type Filter map[string]any

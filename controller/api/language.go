@@ -8,6 +8,28 @@ import (
 	"studying/web/vocabulary"
 )
 
+func GetLangs() server.Response {
+	request, valid := language.GetLanguageRequest()
+
+	if !valid {
+		return server.Response{
+			StatusCode: http.StatusUnprocessableEntity,
+		}
+	}
+
+	filter := vocabulary.LanguageFilter
+	for key, value := range request {
+		filter[key] = value
+	}
+
+	content, _ := vocabulary.GetLangs(filter)
+
+	return server.Response{
+		StatusCode: http.StatusOK,
+		Content:    string(content),
+	}
+}
+
 func AddLang() server.Response {
 	request, valid := language.CreateLanguageRequest()
 

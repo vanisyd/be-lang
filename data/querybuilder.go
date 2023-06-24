@@ -21,6 +21,8 @@ func (query *Query) AddStmt(stmt interface{}) *Query {
 	case InsertStmt:
 		query.InsertStmt = statement
 		query.Type = QUERY_TYPE_INSERT
+	case OrderStmt:
+		query.OrderStmts = append(query.OrderStmts, statement)
 	}
 
 	return query
@@ -65,6 +67,16 @@ func (query *Query) Insert(values map[string]interface{}) *Query {
 	return query
 }
 
+func (query *Query) Order(field string, direction string, model Model) *Query {
+	query.AddStmt(OrderStmt{
+		field,
+		direction,
+		model,
+	})
+
+	return query
+}
+
 func (query *Query) ToJson() ([]byte, error) {
 	return json.Marshal(query.Data)
 }
@@ -73,17 +85,9 @@ func (query *Query) clearData() {
 	query.Data = make([]map[string]any, 0)
 }
 
-func (stmt *SelectStmt) getColumns() (columns []string) {
-	for _, column := range stmt.Model.Columns {
-		columns = append(columns, column.SQLName)
-	}
-
-	return columns
-}
-
-func Execute(dbConnection *sql.DB, queryObj *Query) sql.Result {
-	query := prepareQuery(queryObj)
-	result, err := dbConnection.Exec(query)
+func (query *Query) Exec(dbConnection *sql.DB) sql.Result {
+	queryString := prepareQuery(query)
+	result, err := dbConnection.Exec(queryString)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -91,9 +95,9 @@ func Execute(dbConnection *sql.DB, queryObj *Query) sql.Result {
 	return result
 }
 
-func Get(dbConnection *sql.DB, queryObj *Query) {
-	query := prepareQuery(queryObj)
-	rows, err := dbConnection.Query(query)
+func (query *Query) Get(dbConnection *sql.DB) {
+	queryString := prepareQuery(query)
+	rows, err := dbConnection.Query(queryString)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,15 +115,15 @@ func Get(dbConnection *sql.DB, queryObj *Query) {
 
 		serializedData := make(map[string]interface{}, len(columns))
 		colIndex := 0
-		for _, stmt := range queryObj.SelectStmts {
+		for _, stmt := range query.SelectStmts {
 			serializedStmt := make(map[string]interface{}, len(stmt.Model.Columns))
 			for _, column := range stmt.Model.Columns {
 				value := string(data[colIndex])
-				serializedStmt[column.Name] = value
+				serializedStmt[column.SQLName] = value
 				colIndex++
 			}
 
-			if stmt.Model.GetName() == queryObj.Model.GetName() {
+			if stmt.Model.GetName() == query.Model.GetName() {
 				for key, val := range serializedStmt {
 					serializedData[key] = val
 				}
@@ -133,10 +137,47 @@ func Get(dbConnection *sql.DB, queryObj *Query) {
 				}
 			}
 		}
-		queryObj.Data = append(queryObj.Data, serializedData)
+		query.Data = append(query.Data, serializedData)
 	}
 
 	return
+}
+
+func (stmt *SelectStmt) getColumns() (columns []string) {
+	for _, column := range stmt.Model.Columns {
+		columns = append(columns, column.SQLName)
+	}
+
+	return columns
+}
+
+func (query *Query) Filter(filters Filter) *Query {
+	for key, value := range filters {
+		if value != nil && value != 0 {
+			if key != KEYWORD_SORT_BY {
+				var val string
+				switch convVal := value.(type) {
+				case int:
+					val = strconv.Itoa(convVal)
+				case int64:
+					val = strconv.Itoa(int(convVal))
+				case string:
+					val = convVal
+				}
+
+				if val != "" {
+					query.Where(query.Model.TableName()+"."+key, "=", val)
+				}
+			} else {
+				val, ok := value.(string)
+				if ok && val != "" {
+					query.Order(val, DIR_ASC, query.Model)
+				}
+			}
+		}
+	}
+
+	return query
 }
 
 func prepareQuery(queryObj *Query) (query string) {
@@ -176,9 +217,21 @@ func prepareStatements(query *Query) (queryString string) {
 		for i, stmt := range query.ConditionStmts {
 			if i == 0 {
 				queryString += " WHERE"
+			} else {
+				queryString += " AND"
 			}
 
-			queryString += " " + fmt.Sprintf("%s %s %s", stmt.Field, stmt.Operator, stmt.Value)
+			queryString += " " + fmt.Sprintf("%s %s '%s'", stmt.Field, stmt.Operator, stmt.Value)
+		}
+
+		for i, stmt := range query.OrderStmts {
+			if i == 0 {
+				queryString += " ORDER BY"
+			} else {
+				queryString += " ,"
+			}
+
+			queryString += " " + fmt.Sprintf("%s.%s %s", stmt.Model.TableName(), stmt.Field, stmt.Direction)
 		}
 	case QUERY_TYPE_INSERT:
 		columns, values := prepareQueryValues(query.InsertStmt)

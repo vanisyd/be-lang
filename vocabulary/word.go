@@ -1,34 +1,26 @@
 package vocabulary
 
 import (
-	"fmt"
 	"log"
 	"studying/web/data"
 )
 
-type Word struct {
-	ID         int    `json:"id"`
-	Text       string `json:"text"`
-	LanguageID int    `json:"language_id"`
-	Type       int    `json:"type"`
-	CreatedAt  string `json:"created_at"`
-	Language   Language
+var WordFilter data.Filter = data.Filter{
+	"id":          nil,
+	"text":        nil,
+	"language_id": nil,
+	"type":        nil,
+	"created_at":  nil,
 }
 
-type Language struct {
-	ID        int    `json:"id"`
-	ISO       string `json:"iso"`
-	CreatedAt string `json:"created_at"`
-}
-
-type Translation struct {
-	ID            int `json:"id"`
-	WordID        int `json:"word_id"`
-	TranslationID int `json:"translation_id"`
+var LanguageFilter data.Filter = data.Filter{
+	"id":         nil,
+	"iso":        nil,
+	"created_at": nil,
 }
 
 var WordModel data.Model = data.Model{
-	Name:    "Word",
+	Name:    "word",
 	SQLName: "words",
 	Columns: []data.ModelField{
 		{
@@ -55,7 +47,7 @@ var WordModel data.Model = data.Model{
 }
 
 var LanguageModel data.Model = data.Model{
-	Name:    "Language",
+	Name:    "language",
 	SQLName: "languages",
 	Columns: []data.ModelField{
 		{
@@ -74,7 +66,7 @@ var LanguageModel data.Model = data.Model{
 }
 
 var TranslationModel data.Model = data.Model{
-	Name:    "Translation",
+	Name:    "translation",
 	SQLName: "translations",
 	Columns: []data.ModelField{
 		{
@@ -92,52 +84,50 @@ var TranslationModel data.Model = data.Model{
 	},
 }
 
-func (*Word) MakeArray() []Word {
-	return []Word{}
-}
-
-func (*Word) MakeInstance() Word {
-	return Word{}
-}
-
-func GetWords(langId int) ([]byte, error) {
+func GetWords(filter data.Filter) ([]byte, error) {
 	dbConnection := data.DBConnection()
-
 	query := data.Query{
 		Model: WordModel,
 	}
 
 	query.Select(WordModel).Select(LanguageModel)
 	query.Join(WordModel, LanguageModel, "language_id", "id")
-	query.Where("words.language_id", "=", fmt.Sprint(langId))
-	data.Get(dbConnection, &query)
+	query.Filter(filter)
+	query.Get(dbConnection)
 
 	return query.ToJson()
 }
 
-func AddWord(wordObj Word) Word {
+func GetLangs(filter data.Filter) ([]byte, error) {
+	dbConnection := data.DBConnection()
+	query := data.Query{
+		Model: LanguageModel,
+	}
+
+	query.Select(LanguageModel)
+	query.Filter(filter)
+	query.Get(dbConnection)
+
+	return query.ToJson()
+}
+
+func AddWord(input map[string]interface{}) int64 {
 	dbConnection := data.DBConnection()
 
 	query := data.Query{
 		Model: WordModel,
 	}
 
-	query.Insert(map[string]interface{}{
-		"text":        wordObj.Text,
-		"language_id": wordObj.LanguageID,
-		"type":        wordObj.Type,
-	})
-	result := data.Execute(dbConnection, &query)
+	query.Insert(input)
+	result := query.Exec(dbConnection)
 
 	wordID, err := result.LastInsertId()
 	if err != nil {
 		log.Fatal(err)
-		return wordObj
+		return 0
 	}
 
-	wordObj.ID = int(wordID)
-
-	return wordObj
+	return wordID
 }
 
 func AddLang(langObj Language) Language {
@@ -150,7 +140,7 @@ func AddLang(langObj Language) Language {
 	query.Insert(map[string]interface{}{
 		"iso": langObj.ISO,
 	})
-	result := data.Execute(dbConnection, &query)
+	result := query.Exec(dbConnection)
 
 	langID, err := result.LastInsertId()
 	if err != nil {

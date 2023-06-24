@@ -19,6 +19,12 @@ func (field *RequestField) Int() *RequestField {
 	return field
 }
 
+func (field *RequestField) Sometimes() *RequestField {
+	field.Rules = append(field.Rules, RULE_SOMETIMES)
+
+	return field
+}
+
 func (field *RequestField) SetName(fieldName string) *RequestField {
 	field.Name = fieldName
 
@@ -36,6 +42,7 @@ func Validate(rules []RequestField) (reqValues map[string]any, valid bool) {
 	valid = true
 
 	for _, field := range rules {
+		var notRequired bool
 		var convertedValue any
 		val := GetParam(field.Name)
 		fieldValid := true
@@ -46,9 +53,11 @@ func Validate(rules []RequestField) (reqValues map[string]any, valid bool) {
 				if val == "" {
 					fieldValid = false
 				}
+			case RULE_SOMETIMES:
+				notRequired = true
 			case RULE_INT:
 				value, err := strconv.Atoi(val)
-				if err != nil {
+				if err != nil && !notRequired {
 					fieldValid = false
 				}
 				convertedValue = value

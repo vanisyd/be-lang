@@ -7,3 +7,4 @@ const METHOD_PUT = "PUT"
 
 const RULE_REQUIRED = "required"
 const RULE_INT = "int"
+const RULE_SOMETIMES = "sometimes"

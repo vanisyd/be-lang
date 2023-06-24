@@ -16,7 +16,12 @@ func GetWords() server.Response {
 		}
 	}
 
-	content, _ := vocabulary.GetWords(request["lang_id"].(int))
+	filter := vocabulary.WordFilter
+	for key, value := range request {
+		filter[key] = value
+	}
+
+	content, _ := vocabulary.GetWords(filter)
 
 	return server.Response{
 		StatusCode: http.StatusOK,
@@ -25,8 +30,23 @@ func GetWords() server.Response {
 }
 
 func AddWord() server.Response {
+	request, valid := word.CreateWordRequest()
+	if !valid {
+		return server.Response{
+			StatusCode: http.StatusUnprocessableEntity,
+		}
+	}
+
+	var wordData []byte
+	wordId := vocabulary.AddWord(request)
+	if wordId != 0 {
+		filter := vocabulary.WordFilter
+		filter["id"] = wordId
+		wordData, _ = vocabulary.GetWords(filter)
+	}
+
 	return server.Response{
 		StatusCode: http.StatusAccepted,
-		Content:    "works",
+		Content:    string(wordData),
 	}
 }

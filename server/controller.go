@@ -1,9 +1,11 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 type Action func() Response
@@ -19,11 +21,12 @@ type Request struct {
 
 var HTTPRequest *http.Request
 var HTTPQuery url.Values
+var HTTPBody map[string]any
 
 func GetResponse(w http.ResponseWriter, r *http.Request, handler Action) {
 	HTTPRequest = r
 	HTTPQuery = HTTPRequest.URL.Query()
-	r.ParseForm()
+	json.NewDecoder(HTTPRequest.Body).Decode(&HTTPBody)
 	resp := handler()
 	w.WriteHeader(resp.StatusCode)
 	fmt.Fprintf(w, "%s", resp.Content)
@@ -36,8 +39,19 @@ func GetQueryParam(name string) (param string) {
 }
 
 func GetBodyParam(name string) (param string) {
-	values := HTTPRequest.Form
-	param = values.Get(name)
+	if HTTPBody != nil {
+		neededVal, ok := HTTPBody[name]
+		if ok {
+			switch convVal := neededVal.(type) {
+			case int:
+				param = strconv.Itoa(convVal)
+			case float64:
+				param = strconv.FormatFloat(convVal, 'G', -1, 32)
+			case string:
+				param = convVal
+			}
+		}
+	}
 
 	return
 }
