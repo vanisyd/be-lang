@@ -1,6 +1,9 @@
 package word
 
-import "studying/web/server"
+import (
+	"studying/web/data"
+	"studying/web/server"
+)
 
 func GetWordRequest() (input map[string]any, err bool) {
 	rules := []server.RequestField{
@@ -9,7 +12,8 @@ func GetWordRequest() (input map[string]any, err bool) {
 		*server.Rule("text"),
 		*server.Rule("type").Sometimes().Int(),
 		*server.Rule("created_at").Sometimes(),
-		*server.Rule("sort_by").Sometimes(),
+		*server.Rule(data.KEYWORD_SORT_BY).Sometimes(),
+		*server.Rule(data.KEYWORD_SORT_DIR).Sometimes(),
 	}
 
 	input, err = server.Validate(rules)
@@ -22,6 +26,8 @@ func CreateWordRequest() (input map[string]any, err bool) {
 		*server.Rule("language_id").Int(),
 		*server.Rule("text").Required(),
 		*server.Rule("type").Int(),
+		*server.Rule(data.KEYWORD_SORT_BY).Sometimes(),
+		*server.Rule(data.KEYWORD_SORT_DIR).Sometimes(),
 	}
 
 	input, err = server.Validate(rules)

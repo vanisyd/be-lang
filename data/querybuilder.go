@@ -7,6 +7,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"studying/web/helper"
 )
 
 func (query *Query) AddStmt(stmt interface{}) *Query {
@@ -154,7 +155,7 @@ func (stmt *SelectStmt) getColumns() (columns []string) {
 func (query *Query) Filter(filters Filter) *Query {
 	for key, value := range filters {
 		if value != nil && value != 0 {
-			if key != KEYWORD_SORT_BY {
+			if !helper.InSlice(GetSortKeywords(), key) {
 				var val string
 				switch convVal := value.(type) {
 				case int:
@@ -171,7 +172,17 @@ func (query *Query) Filter(filters Filter) *Query {
 			} else {
 				val, ok := value.(string)
 				if ok && val != "" {
-					query.Order(val, DIR_ASC, query.Model)
+					var direction string = DEFAULT_SORT_DIR
+					sortDir, ok := filters[KEYWORD_SORT_DIR]
+					if ok {
+						sortDirVal, ok := sortDir.(string)
+						if ok {
+							direction = sortDirVal
+						}
+						delete(filters, KEYWORD_SORT_DIR)
+					}
+					delete(filters, KEYWORD_SORT_BY)
+					query.Order(val, direction, query.Model)
 				}
 			}
 		}

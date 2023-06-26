@@ -18,3 +18,13 @@ const QUERY_TYPE_SELECT = 2
 const QUERY_TYPE_UPDATE = 3
 
 const KEYWORD_SORT_BY = "sort_by"
+const KEYWORD_SORT_DIR = "sort"
+
+const DEFAULT_SORT_DIR = DIR_DESC
+
+func GetSortKeywords() []string {
+	return []string{
+		KEYWORD_SORT_BY,
+		KEYWORD_SORT_DIR,
+	}
+}
