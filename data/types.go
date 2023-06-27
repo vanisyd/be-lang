@@ -23,6 +23,11 @@ type SelectStmt struct {
 	Model Model
 }
 
+type UpdateStmt struct {
+	Model  Model
+	Fields map[string]interface{}
+}
+
 type ConditionStmt struct {
 	Field    string
 	Operator string
@@ -48,6 +53,7 @@ type Query struct {
 	JoinStmts      []JoinStmt
 	InsertStmt     InsertStmt
 	OrderStmts     []OrderStmt
+	UpdateStmts    []UpdateStmt
 	Data           []map[string]any
 	Type           int
 }

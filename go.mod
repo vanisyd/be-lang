@@ -1,4 +1,4 @@
-module studying/web
+module web
 
 go 1.20
 

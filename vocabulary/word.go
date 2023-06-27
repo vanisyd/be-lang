@@ -2,7 +2,7 @@ package vocabulary
 
 import (
 	"log"
-	"studying/web/data"
+	"web/data"
 )
 
 var WordFilter data.Filter = data.Filter{

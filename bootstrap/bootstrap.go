@@ -2,8 +2,8 @@ package bootstrap
 
 import (
 	"net/http"
-	"studying/web/controller/router"
-	"studying/web/server"
+	"web/controller/router"
+	"web/server"
 )
 
 func Execute() {

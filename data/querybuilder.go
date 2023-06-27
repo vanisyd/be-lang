@@ -7,7 +7,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"studying/web/helper"
+	"web/helper"
 )
 
 func (query *Query) AddStmt(stmt interface{}) *Query {
@@ -24,6 +24,9 @@ func (query *Query) AddStmt(stmt interface{}) *Query {
 		query.Type = QUERY_TYPE_INSERT
 	case OrderStmt:
 		query.OrderStmts = append(query.OrderStmts, statement)
+	case UpdateStmt:
+		query.UpdateStmts = append(query.UpdateStmts, statement)
+		query.Type = QUERY_TYPE_UPDATE
 	}
 
 	return query
@@ -63,6 +66,15 @@ func (query *Query) Insert(values map[string]interface{}) *Query {
 	query.AddStmt(InsertStmt{
 		query.Model,
 		values,
+	})
+
+	return query
+}
+
+func (query *Query) Update(model Model, fields map[string]interface{}) *Query {
+	query.AddStmt(UpdateStmt{
+		model,
+		fields,
 	})
 
 	return query
@@ -239,7 +251,7 @@ func prepareStatements(query *Query) (queryString string) {
 			if i == 0 {
 				queryString += " ORDER BY"
 			} else {
-				queryString += " ,"
+				queryString += ","
 			}
 
 			queryString += " " + fmt.Sprintf("%s.%s %s", stmt.Model.TableName(), stmt.Field, stmt.Direction)
@@ -247,6 +259,8 @@ func prepareStatements(query *Query) (queryString string) {
 	case QUERY_TYPE_INSERT:
 		columns, values := prepareQueryValues(query.InsertStmt)
 		queryString += fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", query.InsertStmt.Model.TableName(), columns, values)
+	case QUERY_TYPE_UPDATE:
+		queryString += "UPDATE TABLE " + query.Model.TableName()
 	}
 
 	return

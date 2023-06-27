@@ -1,8 +1,8 @@
 package word
 
 import (
-	"studying/web/data"
-	"studying/web/server"
+	"web/data"
+	"web/server"
 )
 
 func GetWordRequest() (input map[string]any, err bool) {

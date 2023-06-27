@@ -3,9 +3,9 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"studying/web/controller/request/language"
-	"studying/web/server"
-	"studying/web/vocabulary"
+	"web/controller/request/language"
+	"web/server"
+	"web/vocabulary"
 )
 
 func GetLangs() server.Response {

@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"fmt"
-	"studying/web/data"
 	"time"
+	"web/data"
 )
 
 type User struct {

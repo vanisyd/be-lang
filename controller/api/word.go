@@ -2,9 +2,9 @@ package api
 
 import (
 	"net/http"
-	"studying/web/controller/request/word"
-	"studying/web/server"
-	"studying/web/vocabulary"
+	"web/controller/request/word"
+	"web/server"
+	"web/vocabulary"
 )
 
 func GetWords() server.Response {

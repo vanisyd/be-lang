@@ -1,8 +1,8 @@
 package router
 
 import (
-	"studying/web/controller/api"
-	"studying/web/server"
+	"web/controller/api"
+	"web/server"
 )
 
 var Routes map[string]server.Route = map[string]server.Route{

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"studying/web/config"
+	"web/config"
 )
 
 var DB *sql.DB

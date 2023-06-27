@@ -1,10 +1,10 @@
-package web
+package main
 
 import (
-	"studying/web/bootstrap"
+	"web/bootstrap"
 )
 
-func Execute() {
+func main() {
 	// words := vocabulary.AddWord(vocabulary.Word{
 	// 	Text:       "leaf",
 	// 	LanguageID: 1,
