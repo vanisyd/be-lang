@@ -24,7 +24,6 @@ type SelectStmt struct {
 }
 
 type UpdateStmt struct {
-	Model  Model
 	Fields map[string]interface{}
 }
 

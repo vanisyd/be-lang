@@ -44,6 +44,7 @@ func Validate(rules []RequestField) (reqValues map[string]any, valid bool) {
 	for _, field := range rules {
 		var notRequired bool
 		var convertedValue any
+		var isMissing bool
 		val := GetParam(field.Name)
 		fieldValid := true
 
@@ -57,18 +58,25 @@ func Validate(rules []RequestField) (reqValues map[string]any, valid bool) {
 				notRequired = true
 			case RULE_INT:
 				value, err := strconv.Atoi(val)
+				if val != "" {
+					convertedValue = value
+				} else {
+					isMissing = true
+				}
+
 				if err != nil && !notRequired {
 					fieldValid = false
 				}
-				convertedValue = value
 			}
 		}
 
 		if fieldValid {
-			if convertedValue != nil {
-				reqValues[field.Name] = convertedValue
-			} else {
-				reqValues[field.Name] = val
+			if !isMissing {
+				if convertedValue != nil {
+					reqValues[field.Name] = convertedValue
+				} else if val != "" {
+					reqValues[field.Name] = val
+				}
 			}
 		} else {
 			valid = false

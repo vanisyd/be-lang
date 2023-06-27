@@ -5,18 +5,22 @@ import (
 	"web/data"
 )
 
-var WordFilter data.Filter = data.Filter{
-	"id":          nil,
-	"text":        nil,
-	"language_id": nil,
-	"type":        nil,
-	"created_at":  nil,
+func LanguageFilter() data.Filter {
+	return data.Filter{
+		"id":         nil,
+		"iso":        nil,
+		"created_at": nil,
+	}
 }
 
-var LanguageFilter data.Filter = data.Filter{
-	"id":         nil,
-	"iso":        nil,
-	"created_at": nil,
+func WordFilter() data.Filter {
+	return data.Filter{
+		"id":          nil,
+		"text":        nil,
+		"language_id": nil,
+		"type":        nil,
+		"created_at":  nil,
+	}
 }
 
 var WordModel data.Model = data.Model{
@@ -128,6 +132,26 @@ func AddWord(input map[string]interface{}) int64 {
 	}
 
 	return wordID
+}
+
+func UpdateWord(input map[string]interface{}, filter data.Filter) int64 {
+	dbConnection := data.DBConnection()
+
+	query := data.Query{
+		Model: WordModel,
+	}
+
+	query.Update(input)
+	query.Filter(filter)
+	result := query.Exec(dbConnection)
+
+	rowsNumber, err := result.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+		return 0
+	}
+
+	return rowsNumber
 }
 
 func AddLang(langObj Language) Language {

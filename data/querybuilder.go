@@ -71,9 +71,8 @@ func (query *Query) Insert(values map[string]interface{}) *Query {
 	return query
 }
 
-func (query *Query) Update(model Model, fields map[string]interface{}) *Query {
+func (query *Query) Update(fields map[string]interface{}) *Query {
 	query.AddStmt(UpdateStmt{
-		model,
 		fields,
 	})
 
@@ -237,15 +236,8 @@ func prepareStatements(query *Query) (queryString string) {
 		for _, stmt := range query.JoinStmts {
 			queryString += " " + fmt.Sprintf("%s JOIN %s ON %s.%s = %s.%s", stmt.Type, stmt.JoinedModel.TableName(), stmt.BaseModel.TableName(), stmt.Field, stmt.JoinedModel.TableName(), stmt.ForeignField)
 		}
-		for i, stmt := range query.ConditionStmts {
-			if i == 0 {
-				queryString += " WHERE"
-			} else {
-				queryString += " AND"
-			}
 
-			queryString += " " + fmt.Sprintf("%s %s '%s'", stmt.Field, stmt.Operator, stmt.Value)
-		}
+		queryString += prepareConditions(query.ConditionStmts)
 
 		for i, stmt := range query.OrderStmts {
 			if i == 0 {
@@ -260,7 +252,34 @@ func prepareStatements(query *Query) (queryString string) {
 		columns, values := prepareQueryValues(query.InsertStmt)
 		queryString += fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", query.InsertStmt.Model.TableName(), columns, values)
 	case QUERY_TYPE_UPDATE:
-		queryString += "UPDATE TABLE " + query.Model.TableName()
+		queryString += "UPDATE " + query.Model.TableName() + " SET "
+		for i, stmt := range query.UpdateStmts {
+			if i != 0 {
+				queryString += ","
+			}
+
+			fieldIdx := 0
+			for col, val := range stmt.Fields {
+				if fieldIdx != 0 {
+					queryString += ","
+				}
+
+				var value string
+				switch convVal := val.(type) {
+				case int:
+					value = strconv.Itoa(convVal)
+				case string:
+					value = "'" + convVal + "'"
+				case float64:
+					value = strconv.FormatFloat(convVal, 'G', -1, 32)
+				}
+
+				queryString += col + "=" + value
+				fieldIdx++
+			}
+		}
+
+		queryString += prepareConditions(query.ConditionStmts)
 	}
 
 	return
@@ -282,6 +301,20 @@ func prepareQueryValues(stmt InsertStmt) (columns string, values string) {
 		}
 
 		i++
+	}
+
+	return
+}
+
+func prepareConditions(conditions []ConditionStmt) (queryString string) {
+	for i, stmt := range conditions {
+		if i == 0 {
+			queryString += " WHERE"
+		} else {
+			queryString += " AND"
+		}
+
+		queryString += " " + fmt.Sprintf("%s %s '%s'", stmt.Field, stmt.Operator, stmt.Value)
 	}
 
 	return

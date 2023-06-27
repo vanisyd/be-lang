@@ -17,7 +17,7 @@ func GetLangs() server.Response {
 		}
 	}
 
-	filter := vocabulary.LanguageFilter
+	filter := vocabulary.LanguageFilter()
 	for key, value := range request {
 		filter[key] = value
 	}
