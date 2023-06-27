@@ -58,3 +58,12 @@ type Query struct {
 }
 
 type Filter map[string]any
+
+func MakeFilter(values map[string]any) Filter {
+	newFilter := make(Filter)
+	for key, val := range values {
+		newFilter[key] = val
+	}
+
+	return newFilter
+}

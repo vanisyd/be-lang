@@ -9,14 +9,13 @@ import (
 func Execute() {
 	handler := http.NewServeMux()
 
+	server.BuildRouterMap(router.NRoutes)
+
 	handler.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
-		if path[len(path)-1:] != "/" {
-			path += "/"
-		}
+		route := server.GetRouteByPath(path)
 
-		route, ok := router.Routes[path]
-		if !ok {
+		if route.Handler == nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
