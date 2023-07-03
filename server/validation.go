@@ -1,26 +1,48 @@
 package server
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 type RequestField struct {
-	Name  string
-	Rules []string
+	Name string
+	Rule ValidationRule
+}
+
+type ValidationRule struct {
+	Required bool
+	Length   int
+	Type     string
+	Values   []any
 }
 
 func (field *RequestField) Required() *RequestField {
-	field.Rules = append(field.Rules, RULE_REQUIRED)
+	field.Rule.Required = true
 
 	return field
 }
 
 func (field *RequestField) Int() *RequestField {
-	field.Rules = append(field.Rules, RULE_INT)
+	field.Rule.Type = TYPE_INT
+
+	return field
+}
+
+func (field *RequestField) String() *RequestField {
+	field.Rule.Type = TYPE_STRING
 
 	return field
 }
 
 func (field *RequestField) Sometimes() *RequestField {
-	field.Rules = append(field.Rules, RULE_SOMETIMES)
+	field.Rule.Required = false
+
+	return field
+}
+
+func (field *RequestField) In(values []interface{}) *RequestField {
+	field.Rule.Values = values
 
 	return field
 }
@@ -33,55 +55,80 @@ func (field *RequestField) SetName(fieldName string) *RequestField {
 
 func Rule(fieldName string) (reqField *RequestField) {
 	reqField = new(RequestField).SetName(fieldName)
+	reqField.Required()
 
 	return
 }
 
-func Validate(rules []RequestField) (reqValues map[string]any, valid bool) {
-	reqValues = map[string]any{}
+func Validate(reqFields []RequestField) (reqValues map[string]any, valid bool, fieldErrors map[string][]string) {
+	reqValues = make(map[string]any)
 	valid = true
 
-	for _, field := range rules {
-		var notRequired bool
-		var convertedValue any
-		var isMissing bool
-		val := GetParam(field.Name)
+	for _, field := range reqFields {
+		var convertedValue interface{}
 		fieldValid := true
+		value := GetParam(field.Name)
 
-		for _, rule := range field.Rules {
-			switch rule {
-			case RULE_REQUIRED:
-				if val == "" {
-					fieldValid = false
-				}
-			case RULE_SOMETIMES:
-				notRequired = true
-			case RULE_INT:
-				value, err := strconv.Atoi(val)
-				if val != "" {
-					convertedValue = value
-				} else {
-					isMissing = true
-				}
-
-				if err != nil && !notRequired {
-					fieldValid = false
-				}
+		if value == "" {
+			if field.Rule.Required {
+				addError(field.Name, &fieldErrors, fmt.Sprintf(VALIDATION_ERROR_REQUIRED, field.Name), &fieldValid)
+			} else {
+				continue
 			}
 		}
 
-		if fieldValid {
-			if !isMissing {
-				if convertedValue != nil {
-					reqValues[field.Name] = convertedValue
-				} else if val != "" {
-					reqValues[field.Name] = val
+		if field.Rule.Type != "" {
+			switch field.Rule.Type {
+			case TYPE_INT:
+				intValue, error := strconv.Atoi(value)
+				if error == nil {
+					convertedValue = intValue
+				} else {
+					addError(field.Name, &fieldErrors, fmt.Sprintf(VALIDATION_ERROR_INCORRECT_TYPE, field.Name, TYPE_INT), &fieldValid)
 				}
+			case TYPE_STRING:
+				convertedValue = value
+			}
+		}
+
+		// valueType := reflect.TypeOf(convertedValue).String()
+
+		// fmt.Println(valueType)
+		// var isInSlice bool
+		// switch val := convertedValue.(type) {
+		// case int:
+		// 	isInSlice = helper.InSlice(field.Rule.Values, val)
+		// }
+
+		if fieldValid {
+			if convertedValue != nil {
+				reqValues[field.Name] = convertedValue
+			} else if value != "" {
+				reqValues[field.Name] = value
 			}
 		} else {
 			valid = false
 		}
 	}
 
+	if fieldErrors != nil {
+		valid = false
+	}
+
 	return
+}
+
+func addError(fieldName string, errors *map[string][]string, errorText string, fieldValid *bool) {
+	if (*errors) == nil {
+		(*errors) = map[string][]string{}
+	}
+	fieldSlice, ok := (*errors)[fieldName]
+	if !ok {
+		(*errors)[fieldName] = []string{}
+		fieldSlice = (*errors)[fieldName]
+	}
+
+	fieldSlice = append(fieldSlice, errorText)
+	(*errors)[fieldName] = fieldSlice
+	(*fieldValid) = false
 }

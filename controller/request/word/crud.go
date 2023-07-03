@@ -5,7 +5,7 @@ import (
 	"web/server"
 )
 
-func GetWordRequest() (input map[string]any, err bool) {
+func GetWordRequest() (input map[string]any, valid bool, errors map[string][]string) {
 	rules := []server.RequestField{
 		*server.Rule("id").Sometimes().Int(),
 		*server.Rule("language_id").Sometimes().Int(),
@@ -16,24 +16,24 @@ func GetWordRequest() (input map[string]any, err bool) {
 		*server.Rule(data.KEYWORD_SORT_DIR).Sometimes(),
 	}
 
-	input, err = server.Validate(rules)
+	input, valid, errors = server.Validate(rules)
 
 	return
 }
 
-func CreateWordRequest() (input map[string]any, err bool) {
+func CreateWordRequest() (input map[string]any, valid bool, errors map[string][]string) {
 	rules := []server.RequestField{
 		*server.Rule("language_id").Int(),
 		*server.Rule("text").Required(),
 		*server.Rule("type").Int(),
 	}
 
-	input, err = server.Validate(rules)
+	input, valid, errors = server.Validate(rules)
 
 	return
 }
 
-func UpdateWordRequest() (input map[string]any, err bool) {
+func UpdateWordRequest() (input map[string]any, valid bool, errors map[string][]string) {
 	rules := []server.RequestField{
 		*server.Rule("id").Int(),
 		*server.Rule("language_id").Sometimes().Int(),
@@ -41,7 +41,7 @@ func UpdateWordRequest() (input map[string]any, err bool) {
 		*server.Rule("type").Sometimes().Int(),
 	}
 
-	input, err = server.Validate(rules)
+	input, valid, errors = server.Validate(rules)
 
 	return
 }

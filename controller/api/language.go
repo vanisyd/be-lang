@@ -9,7 +9,7 @@ import (
 )
 
 func GetLangs() server.Response {
-	request, valid := language.GetLanguageRequest()
+	request, valid, _ := language.GetLanguageRequest()
 
 	if !valid {
 		return server.Response{
@@ -31,7 +31,7 @@ func GetLangs() server.Response {
 }
 
 func AddLang() server.Response {
-	request, valid := language.CreateLanguageRequest()
+	request, valid, _ := language.CreateLanguageRequest()
 
 	if !valid {
 		return server.Response{

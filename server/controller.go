@@ -24,6 +24,7 @@ var HTTPQuery url.Values
 var HTTPBody map[string]any
 
 func GetResponse(w http.ResponseWriter, r *http.Request, handler Action) {
+	HTTPBody = make(map[string]any)
 	HTTPRequest = r
 	HTTPQuery = HTTPRequest.URL.Query()
 	json.NewDecoder(HTTPRequest.Body).Decode(&HTTPBody)

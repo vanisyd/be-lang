@@ -9,7 +9,7 @@ import (
 )
 
 func GetWords() server.Response {
-	request, valid := word.GetWordRequest()
+	request, valid, _ := word.GetWordRequest()
 
 	if !valid {
 		return server.Response{
@@ -31,7 +31,7 @@ func GetWords() server.Response {
 }
 
 func AddWord() server.Response {
-	request, valid := word.CreateWordRequest()
+	request, valid, _ := word.CreateWordRequest()
 	if !valid {
 		return server.Response{
 			StatusCode: http.StatusUnprocessableEntity,
@@ -53,7 +53,7 @@ func AddWord() server.Response {
 }
 
 func UpdateWord() server.Response {
-	request, valid := word.UpdateWordRequest()
+	request, valid, _ := word.UpdateWordRequest()
 	if !valid {
 		return server.Response{
 			StatusCode: http.StatusUnprocessableEntity,
