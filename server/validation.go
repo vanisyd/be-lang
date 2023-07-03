@@ -2,47 +2,118 @@ package server
 
 import (
 	"fmt"
+	"log"
+	"reflect"
 	"strconv"
+	"web/helper"
 )
 
 type RequestField struct {
-	Name string
-	Rule ValidationRule
+	Name           string
+	Rules          []ValidationRule
+	Value          string
+	ConvertedValue interface{}
 }
 
-type ValidationRule struct {
-	Required bool
-	Length   int
-	Type     string
-	Values   []any
+type RequiredRule struct{}
+type SometimesRule struct{}
+type TypeRule struct {
+	FieldType string
+}
+type InRule[T string | int] struct {
+	Values []T
+}
+
+type ValidationRule interface {
+	Check(field *RequestField, errors *map[string][]string) (valid bool)
+}
+
+func (rule RequiredRule) Check(field *RequestField, errors *map[string][]string) (valid bool) {
+	valid = true
+
+	if field.Value == "" {
+		addError(field.Name, errors, fmt.Sprintf(VALIDATION_ERROR_REQUIRED, field.Name), &valid)
+	}
+
+	return
+}
+
+func (rule TypeRule) Check(field *RequestField, errors *map[string][]string) (valid bool) {
+	valid = true
+	if field.Value == "" {
+		return
+	}
+
+	switch rule.FieldType {
+	case TYPE_INT:
+		intValue, error := strconv.Atoi(field.Value)
+		if error == nil {
+			field.ConvertedValue = intValue
+		} else {
+			addError(field.Name, errors, fmt.Sprintf(VALIDATION_ERROR_INCORRECT_TYPE, field.Name, TYPE_INT), &valid)
+		}
+	case TYPE_STRING:
+		field.ConvertedValue = field.Value
+	}
+
+	return
+}
+
+func (rule InRule[T]) Check(field *RequestField, errors *map[string][]string) (valid bool) {
+	valid = true
+	if field.Value == "" {
+		return
+	}
+
+	valid = helper.InSlice(rule.Values, field.ConvertedValue.(T))
+
+	return
 }
 
 func (field *RequestField) Required() *RequestField {
-	field.Rule.Required = true
+	var rule ValidationRule = RequiredRule{}
+	field.Rules = append(field.Rules, rule)
 
 	return field
 }
 
 func (field *RequestField) Int() *RequestField {
-	field.Rule.Type = TYPE_INT
+	var rule ValidationRule = TypeRule{
+		FieldType: TYPE_INT,
+	}
+	field.Rules = append(field.Rules, rule)
 
 	return field
 }
 
 func (field *RequestField) String() *RequestField {
-	field.Rule.Type = TYPE_STRING
+	var rule ValidationRule = TypeRule{
+		FieldType: TYPE_STRING,
+	}
+	field.Rules = append(field.Rules, rule)
 
 	return field
 }
 
-func (field *RequestField) Sometimes() *RequestField {
-	field.Rule.Required = false
+func (field *RequestField) In(values interface{}) *RequestField {
+	if reflect.TypeOf(values).Kind() != reflect.Slice {
+		log.Fatal("Incorrect parameter type, attribute must be a slice")
+	}
 
-	return field
-}
+	var rule ValidationRule
 
-func (field *RequestField) In(values []interface{}) *RequestField {
-	field.Rule.Values = values
+	switch convValues := values.(type) {
+	case []string:
+		rule = InRule[string]{
+			Values: convValues,
+		}
+	case []int:
+		rule = InRule[int]{
+			Values: convValues,
+		}
+	}
+
+	field.Rules = append(field.Rules, rule)
 
 	return field
 }
@@ -55,7 +126,6 @@ func (field *RequestField) SetName(fieldName string) *RequestField {
 
 func Rule(fieldName string) (reqField *RequestField) {
 	reqField = new(RequestField).SetName(fieldName)
-	reqField.Required()
 
 	return
 }
@@ -65,54 +135,22 @@ func Validate(reqFields []RequestField) (reqValues map[string]any, valid bool, f
 	valid = true
 
 	for _, field := range reqFields {
-		var convertedValue interface{}
 		fieldValid := true
-		value := GetParam(field.Name)
+		field.Value = GetParam(field.Name)
 
-		if value == "" {
-			if field.Rule.Required {
-				addError(field.Name, &fieldErrors, fmt.Sprintf(VALIDATION_ERROR_REQUIRED, field.Name), &fieldValid)
-			} else {
-				continue
-			}
+		for _, rule := range field.Rules {
+			fieldValid = rule.Check(&field, &fieldErrors)
 		}
-
-		if field.Rule.Type != "" {
-			switch field.Rule.Type {
-			case TYPE_INT:
-				intValue, error := strconv.Atoi(value)
-				if error == nil {
-					convertedValue = intValue
-				} else {
-					addError(field.Name, &fieldErrors, fmt.Sprintf(VALIDATION_ERROR_INCORRECT_TYPE, field.Name, TYPE_INT), &fieldValid)
-				}
-			case TYPE_STRING:
-				convertedValue = value
-			}
-		}
-
-		// valueType := reflect.TypeOf(convertedValue).String()
-
-		// fmt.Println(valueType)
-		// var isInSlice bool
-		// switch val := convertedValue.(type) {
-		// case int:
-		// 	isInSlice = helper.InSlice(field.Rule.Values, val)
-		// }
 
 		if fieldValid {
-			if convertedValue != nil {
-				reqValues[field.Name] = convertedValue
-			} else if value != "" {
-				reqValues[field.Name] = value
+			if field.ConvertedValue != nil {
+				reqValues[field.Name] = field.ConvertedValue
+			} else if field.Value != "" {
+				reqValues[field.Name] = field.Value
 			}
 		} else {
 			valid = false
 		}
-	}
-
-	if fieldErrors != nil {
-		valid = false
 	}
 
 	return

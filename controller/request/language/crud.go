@@ -14,9 +14,9 @@ func CreateLanguageRequest() (input map[string]any, valid bool, errors map[strin
 
 func GetLanguageRequest() (input map[string]any, valid bool, errors map[string][]string) {
 	rules := []server.RequestField{
-		*server.Rule("id").Sometimes().Int(),
-		*server.Rule("iso").Sometimes(),
-		*server.Rule("created_at").Sometimes(),
+		*server.Rule("id").Int(),
+		*server.Rule("iso"),
+		*server.Rule("created_at"),
 	}
 
 	input, valid, errors = server.Validate(rules)

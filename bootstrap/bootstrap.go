@@ -1,12 +1,14 @@
 package bootstrap
 
 import (
+	"log"
 	"net/http"
 	"web/controller/router"
 	"web/server"
 )
 
 func Execute() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	handler := http.NewServeMux()
 
 	server.BuildRouterMap(router.NRoutes)
