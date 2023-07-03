@@ -181,7 +181,7 @@ func (query *Query) Filter(filters Filter) *Query {
 					query.Where(query.Model.TableName()+"."+key, "=", val)
 				}
 			} else {
-				val, ok := value.(string)
+				val, ok := filters[KEYWORD_SORT_BY].(string)
 				if ok && val != "" {
 					var direction string = DEFAULT_SORT_DIR
 					sortDir, ok := filters[KEYWORD_SORT_DIR]
