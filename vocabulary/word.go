@@ -91,13 +91,14 @@ var TranslationModel data.Model = data.Model{
 func GetWords(filter data.Filter) ([]byte, error) {
 	dbConnection := data.DBConnection()
 	query := data.Query{
-		Model: WordModel,
+		Model:        WordModel,
+		DBConnection: dbConnection,
 	}
 
 	query.Select(WordModel).Select(LanguageModel)
 	query.Join(WordModel, LanguageModel, "language_id", "id")
 	query.Filter(filter)
-	query.Get(dbConnection)
+	query.Get()
 
 	return query.ToJson()
 }
@@ -105,12 +106,13 @@ func GetWords(filter data.Filter) ([]byte, error) {
 func GetLangs(filter data.Filter) ([]byte, error) {
 	dbConnection := data.DBConnection()
 	query := data.Query{
-		Model: LanguageModel,
+		Model:        LanguageModel,
+		DBConnection: dbConnection,
 	}
 
 	query.Select(LanguageModel)
 	query.Filter(filter)
-	query.Get(dbConnection)
+	query.Get()
 
 	return query.ToJson()
 }
@@ -119,7 +121,8 @@ func AddWord(input map[string]interface{}) int64 {
 	dbConnection := data.DBConnection()
 
 	query := data.Query{
-		Model: WordModel,
+		Model:        WordModel,
+		DBConnection: dbConnection,
 	}
 
 	query.Insert(input)
@@ -138,7 +141,8 @@ func UpdateWord(input map[string]interface{}, filter data.Filter) int64 {
 	dbConnection := data.DBConnection()
 
 	query := data.Query{
-		Model: WordModel,
+		Model:        WordModel,
+		DBConnection: dbConnection,
 	}
 
 	query.Update(input)
@@ -158,7 +162,8 @@ func AddLang(langObj Language) Language {
 	dbConnection := data.DBConnection()
 
 	query := data.Query{
-		Model: LanguageModel,
+		Model:        LanguageModel,
+		DBConnection: dbConnection,
 	}
 
 	query.Insert(map[string]interface{}{

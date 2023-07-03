@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 	"web/controller/request/word"
 	"web/helper"
@@ -9,12 +10,19 @@ import (
 )
 
 func GetWords() server.Response {
-	request, valid, _ := word.GetWordRequest()
+	var responseContent []byte
+	request, valid, errors := word.GetWordRequest()
 
 	if !valid {
+		errorsJson, err := json.Marshal(errors)
+		if err == nil {
+			responseContent = errorsJson
+		}
 		return server.Response{
 			StatusCode: http.StatusUnprocessableEntity,
+			Content:    string(responseContent),
 		}
+
 	}
 
 	filter := vocabulary.WordFilter()
@@ -22,54 +30,66 @@ func GetWords() server.Response {
 		filter[key] = value
 	}
 
-	content, _ := vocabulary.GetWords(filter)
+	responseContent, _ = vocabulary.GetWords(filter)
 
 	return server.Response{
 		StatusCode: http.StatusOK,
-		Content:    string(content),
+		Content:    string(responseContent),
 	}
 }
 
 func AddWord() server.Response {
-	request, valid, _ := word.CreateWordRequest()
+	var responseContent []byte
+	request, valid, errors := word.CreateWordRequest()
+
 	if !valid {
+		errorsJson, err := json.Marshal(errors)
+		if err == nil {
+			responseContent = errorsJson
+		}
 		return server.Response{
 			StatusCode: http.StatusUnprocessableEntity,
+			Content:    string(responseContent),
 		}
 	}
 
-	var wordData []byte
 	wordId := vocabulary.AddWord(request)
 	if wordId != 0 {
 		filter := vocabulary.WordFilter()
 		filter["id"] = wordId
-		wordData, _ = vocabulary.GetWords(filter)
+		responseContent, _ = vocabulary.GetWords(filter)
 	}
 
 	return server.Response{
 		StatusCode: http.StatusCreated,
-		Content:    string(wordData),
+		Content:    string(responseContent),
 	}
 }
 
 func UpdateWord() server.Response {
-	request, valid, _ := word.UpdateWordRequest()
+	var responseContent []byte
+	request, valid, errors := word.UpdateWordRequest()
+
 	if !valid {
+		errorsJson, err := json.Marshal(errors)
+		if err == nil {
+			responseContent = errorsJson
+		}
 		return server.Response{
 			StatusCode: http.StatusUnprocessableEntity,
+			Content:    string(responseContent),
 		}
 	}
 
-	var wordData []byte
 	filter := vocabulary.WordFilter()
 	filter["id"] = request["id"]
 	result := vocabulary.UpdateWord(helper.Except(request, []string{"id"}), filter)
 	if result != 0 {
-		wordData, _ = vocabulary.GetWords(filter)
+		responseContent, _ = vocabulary.GetWords(filter)
 	}
 
 	return server.Response{
 		StatusCode: http.StatusOK,
-		Content:    string(wordData),
+		Content:    string(responseContent),
 	}
 }

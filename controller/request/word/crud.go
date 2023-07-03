@@ -3,12 +3,16 @@ package word
 import (
 	"web/data"
 	"web/server/validator"
+	"web/vocabulary"
 )
 
 func GetWordRequest() (input map[string]any, valid bool, errors map[string][]string) {
 	rules := []validator.RequestField{
 		*validator.Rule("id").Int(),
-		*validator.Rule("language_id").Int(),
+		*validator.Rule("language_id").Int().Exists(validator.ExistsRule{
+			Model: vocabulary.LanguageModel,
+			Field: "id",
+		}),
 		*validator.Rule("text"),
 		*validator.Rule("type").Int(),
 		*validator.Rule("created_at"),
@@ -23,9 +27,9 @@ func GetWordRequest() (input map[string]any, valid bool, errors map[string][]str
 
 func CreateWordRequest() (input map[string]any, valid bool, errors map[string][]string) {
 	rules := []validator.RequestField{
-		*validator.Rule("language_id").Int(),
-		*validator.Rule("text").Required(),
-		*validator.Rule("type").Int(),
+		*validator.Rule("language_id").Required().Int(),
+		*validator.Rule("text").Required().String(),
+		*validator.Rule("type").Required().Int(),
 	}
 
 	input, valid, errors = validator.Validate(rules)
@@ -36,8 +40,11 @@ func CreateWordRequest() (input map[string]any, valid bool, errors map[string][]
 func UpdateWordRequest() (input map[string]any, valid bool, errors map[string][]string) {
 	rules := []validator.RequestField{
 		*validator.Rule("id").Int(),
-		*validator.Rule("language_id").Int(),
-		*validator.Rule("text"),
+		*validator.Rule("language_id").Int().Exists(validator.ExistsRule{
+			Model: vocabulary.LanguageModel,
+			Field: "id",
+		}),
+		*validator.Rule("text").String(),
 		*validator.Rule("type").Int(),
 	}
 

@@ -9,11 +9,17 @@ import (
 )
 
 func GetLangs() server.Response {
-	request, valid, _ := language.GetLanguageRequest()
+	var responseContent []byte
+	request, valid, errors := language.GetLanguageRequest()
 
 	if !valid {
+		errorsJson, err := json.Marshal(errors)
+		if err == nil {
+			responseContent = errorsJson
+		}
 		return server.Response{
 			StatusCode: http.StatusUnprocessableEntity,
+			Content:    string(responseContent),
 		}
 	}
 
@@ -22,20 +28,26 @@ func GetLangs() server.Response {
 		filter[key] = value
 	}
 
-	content, _ := vocabulary.GetLangs(filter)
+	responseContent, _ = vocabulary.GetLangs(filter)
 
 	return server.Response{
 		StatusCode: http.StatusOK,
-		Content:    string(content),
+		Content:    string(responseContent),
 	}
 }
 
 func AddLang() server.Response {
-	request, valid, _ := language.CreateLanguageRequest()
+	var responseContent []byte
+	request, valid, errors := language.CreateLanguageRequest()
 
 	if !valid {
+		errorsJson, err := json.Marshal(errors)
+		if err == nil {
+			responseContent = errorsJson
+		}
 		return server.Response{
 			StatusCode: http.StatusUnprocessableEntity,
+			Content:    string(responseContent),
 		}
 	}
 
@@ -43,10 +55,10 @@ func AddLang() server.Response {
 		ISO: request["iso"].(string),
 	})
 
-	jsonContent, _ := json.Marshal(content)
+	responseContent, _ = json.Marshal(content)
 
 	return server.Response{
 		StatusCode: http.StatusCreated,
-		Content:    string(jsonContent),
+		Content:    string(responseContent),
 	}
 }

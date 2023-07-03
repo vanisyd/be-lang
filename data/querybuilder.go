@@ -107,9 +107,9 @@ func (query *Query) Exec(dbConnection *sql.DB) sql.Result {
 	return result
 }
 
-func (query *Query) Get(dbConnection *sql.DB) {
+func (query *Query) Get() {
 	queryString := prepareQuery(query)
-	rows, err := dbConnection.Query(queryString)
+	rows, err := query.DBConnection.Query(queryString)
 	if err != nil {
 		log.Fatal(err)
 	}

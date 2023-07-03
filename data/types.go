@@ -1,5 +1,7 @@
 package data
 
+import "database/sql"
+
 type ModelField struct {
 	Name    string
 	SQLName string
@@ -46,6 +48,7 @@ type OrderStmt struct {
 
 type Query struct {
 	Model          Model
+	DBConnection   *sql.DB
 	Statements     []interface{}
 	SelectStmts    []SelectStmt
 	ConditionStmts []ConditionStmt
