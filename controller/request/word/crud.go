@@ -2,7 +2,7 @@ package word
 
 import (
 	"web/data"
-	"web/server/validator"
+	"web/server/http/validator"
 	"web/vocabulary"
 )
 

@@ -14,6 +14,13 @@ type ValidationRule interface {
 	Check(field *RequestField, errors *map[string][]string) (valid bool)
 }
 
+type RequestField struct {
+	Name           string
+	Rules          []ValidationRule
+	Value          string
+	ConvertedValue interface{}
+}
+
 // Required
 type RequiredRule struct{}
 

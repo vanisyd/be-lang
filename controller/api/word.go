@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"web/controller/request/word"
 	"web/helper"
-	"web/server"
+	"web/server/kind"
 	"web/vocabulary"
 )
 
-func GetWords() server.Response {
+func GetWords() kind.Response {
 	var responseContent []byte
 	request, valid, errors := word.GetWordRequest()
 
@@ -18,7 +18,7 @@ func GetWords() server.Response {
 		if err == nil {
 			responseContent = errorsJson
 		}
-		return server.Response{
+		return kind.Response{
 			StatusCode: http.StatusUnprocessableEntity,
 			Content:    string(responseContent),
 		}
@@ -32,13 +32,13 @@ func GetWords() server.Response {
 
 	responseContent, _ = vocabulary.GetWords(filter)
 
-	return server.Response{
+	return kind.Response{
 		StatusCode: http.StatusOK,
 		Content:    string(responseContent),
 	}
 }
 
-func AddWord() server.Response {
+func AddWord() kind.Response {
 	var responseContent []byte
 	request, valid, errors := word.CreateWordRequest()
 
@@ -47,7 +47,7 @@ func AddWord() server.Response {
 		if err == nil {
 			responseContent = errorsJson
 		}
-		return server.Response{
+		return kind.Response{
 			StatusCode: http.StatusUnprocessableEntity,
 			Content:    string(responseContent),
 		}
@@ -60,13 +60,13 @@ func AddWord() server.Response {
 		responseContent, _ = vocabulary.GetWords(filter)
 	}
 
-	return server.Response{
+	return kind.Response{
 		StatusCode: http.StatusCreated,
 		Content:    string(responseContent),
 	}
 }
 
-func UpdateWord() server.Response {
+func UpdateWord() kind.Response {
 	var responseContent []byte
 	request, valid, errors := word.UpdateWordRequest()
 
@@ -75,7 +75,7 @@ func UpdateWord() server.Response {
 		if err == nil {
 			responseContent = errorsJson
 		}
-		return server.Response{
+		return kind.Response{
 			StatusCode: http.StatusUnprocessableEntity,
 			Content:    string(responseContent),
 		}
@@ -88,7 +88,7 @@ func UpdateWord() server.Response {
 		responseContent, _ = vocabulary.GetWords(filter)
 	}
 
-	return server.Response{
+	return kind.Response{
 		StatusCode: http.StatusOK,
 		Content:    string(responseContent),
 	}

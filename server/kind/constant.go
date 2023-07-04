@@ -1,4 +1,4 @@
-package server
+package kind
 
 const METHOD_POST = "POST"
 const METHOD_GET = "GET"
