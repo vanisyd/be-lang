@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"web/controller/request/language"
-	"web/server"
+	"web/server/kind"
 	"web/vocabulary"
 )
 
-func GetLangs() server.Response {
+func GetLangs() kind.Response {
 	var responseContent []byte
 	request, valid, errors := language.GetLanguageRequest()
 
@@ -17,7 +17,7 @@ func GetLangs() server.Response {
 		if err == nil {
 			responseContent = errorsJson
 		}
-		return server.Response{
+		return kind.Response{
 			StatusCode: http.StatusUnprocessableEntity,
 			Content:    string(responseContent),
 		}
@@ -30,13 +30,13 @@ func GetLangs() server.Response {
 
 	responseContent, _ = vocabulary.GetLangs(filter)
 
-	return server.Response{
+	return kind.Response{
 		StatusCode: http.StatusOK,
 		Content:    string(responseContent),
 	}
 }
 
-func AddLang() server.Response {
+func AddLang() kind.Response {
 	var responseContent []byte
 	request, valid, errors := language.CreateLanguageRequest()
 
@@ -45,7 +45,7 @@ func AddLang() server.Response {
 		if err == nil {
 			responseContent = errorsJson
 		}
-		return server.Response{
+		return kind.Response{
 			StatusCode: http.StatusUnprocessableEntity,
 			Content:    string(responseContent),
 		}
@@ -57,7 +57,7 @@ func AddLang() server.Response {
 
 	responseContent, _ = json.Marshal(content)
 
-	return server.Response{
+	return kind.Response{
 		StatusCode: http.StatusCreated,
 		Content:    string(responseContent),
 	}

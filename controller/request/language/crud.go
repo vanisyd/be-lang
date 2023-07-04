@@ -1,8 +1,6 @@
 package language
 
-import (
-	"web/server/validator"
-)
+import "web/server/http/validator"
 
 func CreateLanguageRequest() (input map[string]any, valid bool, errors map[string][]string) {
 	rules := []validator.RequestField{

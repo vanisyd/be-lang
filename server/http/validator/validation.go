@@ -1,15 +1,6 @@
 package validator
 
-import (
-	"web/server"
-)
-
-type RequestField struct {
-	Name           string
-	Rules          []ValidationRule
-	Value          string
-	ConvertedValue interface{}
-}
+import "web/server/http/request"
 
 func (field *RequestField) SetName(fieldName string) *RequestField {
 	field.Name = fieldName
@@ -29,7 +20,7 @@ func Validate(reqFields []RequestField) (reqValues map[string]any, valid bool, f
 
 	for _, field := range reqFields {
 		fieldValid := true
-		field.Value = server.GetParam(field.Name)
+		field.Value = request.GetParam(field.Name)
 
 		for _, rule := range field.Rules {
 			fieldValid = rule.Check(&field, &fieldErrors)

@@ -3,31 +3,33 @@ package bootstrap
 import (
 	"log"
 	"net/http"
-	"web/controller/router"
+	apiRouter "web/controller/router"
 	"web/server"
+	"web/server/http/response"
+	"web/server/http/router"
 )
 
 func Execute() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	handler := http.NewServeMux()
 
-	server.BuildRouterMap(router.NRoutes)
+	router.BuildRouterMap(apiRouter.Routes)
 
 	handler.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
-		route := server.GetRouteByPath(path)
+		server.CurrentRoute = router.GetRouteByPath(path)
 
-		if route.Handler == nil {
+		if server.CurrentRoute.Handler == nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 
-		if route.Method != r.Method {
+		if server.CurrentRoute.Method != r.Method {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
 
-		server.GetResponse(w, r, route.Handler)
+		response.GetResponse(w, r, server.CurrentRoute)
 	})
 
 	server.Run(handler)
