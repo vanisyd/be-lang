@@ -2,8 +2,8 @@ package word
 
 import (
 	"web/data"
+	"web/provider/vocabulary"
 	"web/server/http/validator"
-	"web/vocabulary"
 )
 
 func GetWordRequest() (input map[string]any, valid bool, errors map[string][]string) {

@@ -107,7 +107,8 @@ func (query *Query) Exec(dbConnection *sql.DB) sql.Result {
 	return result
 }
 
-func (query *Query) Get() {
+func (query *Query) Get() int {
+	var dataLength int
 	queryString := prepareQuery(query)
 	rows, err := query.DBConnection.Query(queryString)
 	if err != nil {
@@ -152,7 +153,11 @@ func (query *Query) Get() {
 		query.Data = append(query.Data, serializedData)
 	}
 
-	return
+	if query.Data != nil {
+		dataLength = len(query.Data)
+	}
+
+	return dataLength
 }
 
 func (stmt *SelectStmt) getColumns() (columns []string) {

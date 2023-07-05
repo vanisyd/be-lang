@@ -3,7 +3,6 @@ package router
 import (
 	"web/controller/api"
 	"web/server/kind"
-	"web/server/middleware"
 )
 
 var Routes []kind.Route = []kind.Route{
@@ -14,9 +13,9 @@ var Routes []kind.Route = []kind.Route{
 				Path:    "/",
 				Handler: api.GetWords,
 				Method:  kind.METHOD_GET,
-				Middlewares: []kind.HTTPMiddleware{
-					middleware.AuthMiddleware{},
-				},
+				//Middlewares: []kind.HTTPMiddleware{
+				//	middleware.AuthMiddleware{},
+				//},
 			},
 			{
 				Path:    "/create",

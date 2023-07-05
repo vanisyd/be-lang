@@ -10,6 +10,8 @@ import (
 )
 
 func Execute() {
+	Init()
+
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	handler := http.NewServeMux()
 

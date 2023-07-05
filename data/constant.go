@@ -16,6 +16,7 @@ const DIR_DESC = "DESC"
 const QUERY_TYPE_INSERT = 1
 const QUERY_TYPE_SELECT = 2
 const QUERY_TYPE_UPDATE = 3
+const QUERY_TYPE_DESCRIBE = 4
 
 const KEYWORD_SORT_BY = "sort_by"
 const KEYWORD_SORT_DIR = "sort"

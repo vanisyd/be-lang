@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"web/controller/request/word"
 	"web/helper"
+	"web/provider/vocabulary"
 	"web/server/kind"
-	"web/vocabulary"
 )
 
 func GetWords() kind.Response {
