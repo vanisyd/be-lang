@@ -1,21 +1,30 @@
 package vocabulary
 
 import (
+	"fmt"
 	"log"
 	"web/data"
+	"web/data/model"
+	"web/dataprovider/querybuilder"
+	"web/provider/authservice"
 )
 
 func GetWords(filter data.Filter) ([]byte, error) {
-	dbConnection := data.DBConnection()
-	query := data.Query{
-		Model:        WordModel,
-		DBConnection: dbConnection,
+	var userRes model.Resource
+	query := querybuilder.Query{
+		Model: WordModel,
 	}
+	result := query.Select(authservice.UserModel).Parse(userRes)
+	fmt.Printf("%v", result)
+	/*	query := data.Query{
+			Model:        WordModel,
+			DBConnection: dbConnection,
+		}
 
-	query.Select(WordModel).Select(LanguageModel)
-	query.Join(WordModel, LanguageModel, "language_id", "id")
-	query.Filter(filter)
-	query.Get()
+		query.Select(WordModel).Select(LanguageModel)
+		query.Join(WordModel, LanguageModel, "language_id", "id")
+		query.Filter(filter)
+		query.Get()*/
 
 	return query.ToJson()
 }

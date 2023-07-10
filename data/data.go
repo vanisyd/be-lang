@@ -28,3 +28,7 @@ func DBConnection() *sql.DB {
 
 	return DB
 }
+
+func Init() *sql.DB {
+	return DBConnection()
+}

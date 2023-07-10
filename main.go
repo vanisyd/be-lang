@@ -1,8 +1,6 @@
 package main
 
-import (
-	"web/bootstrap"
-)
+import "web/bootstrap"
 
 func main() {
 	// words := vocabulary.AddWord(vocabulary.Word{
