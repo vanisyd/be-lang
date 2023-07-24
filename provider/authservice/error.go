@@ -1,11 +1,6 @@
 package authservice
 
-import (
-	"errors"
-	"fmt"
-)
-
-func UserNotFound(user User) error {
+/*func UserNotFound(user User) error {
 	return errors.New(fmt.Sprintf("User with ID %d is not found", user.ID))
 }
 
@@ -15,4 +10,4 @@ func WrongPassword(user User) error {
 
 func UserAlreadyExists(user User) error {
 	return errors.New(fmt.Sprintf("User with name %s already exists", user.Name))
-}
+}*/

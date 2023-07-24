@@ -1,2 +1,4 @@
 github.com/go-sql-driver/mysql v1.7.1 h1:lUIinVbN1DY0xBg0eMOzmmtGoHwWBbvnWubQUrtU8EI=
 github.com/go-sql-driver/mysql v1.7.1/go.mod h1:OXbVy3sEdcQ2Doequ6Z5BW6fXNQTmx+9S1MCJN5yJMI=
+github.com/vanisyd/dataprovider v0.0.1 h1:Y7d+Wh9erQCbNm2gvmS7j1EC6Cj1ltPX7r4ZUwGSfMQ=
+github.com/vanisyd/dataprovider v0.0.1/go.mod h1:r7X64bUR0FWlF7WC1hPYEzys3VxrqJci88tgUUgpO1Y=
